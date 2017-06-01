@@ -1,0 +1,161 @@
+Please Note: 
+This is a 'fast documentation'. It's not completely testet.
+
+To read/write/config Controllini IOs a simple lightweight ASCII based protocol is used.
+All Characters must be ASCII as data is processed as string.
+Controllino answers corresponding to the request with a reply message.
+
+Sender to Controllino:
+Sends 4 byte Header and additional N byte Data 
+Header: SRC | P | N | N |
+Data:	D...
+byte 1		SRC	(Set/Read/Config)
+				'S': Set
+				'R': Read
+				'C': Config
+byte 2		P	(Pin)
+				'A: Analog
+				'D': Digital
+				'R': Relay
+				'I': Input
+				'V': Volatile Memory Register
+byte 3,4 	N 	(Number)
+				'00' to '99'
+byte 5...		D 	(Data)
+				'0' to '9'
+
+Valid Protocols:
+SRNNDM(MMM)	Set Relay (Number) High/Low
+			NN : '00' to '15'		(CONTROLLINO_R0 to CONTROLLINO_R15)
+				 '99' Special Character
+				 Applys D to all Relays masked by bitmask M(MMM)
+			D  : '0'* (Low)	'1' (High)
+			Note: * Every Character except '1' equals to Low
+			Reply Message: 	SRNND	(echo request) on success
+							NAK: Command Invalid 	on			protocol error
+			Example: 		Sender to Controllini:	SR021	(Set Relay 02 to High)
+							Controllini to Sender:	SR021	(Set Relay 02 to High)
+			Example:		Sender to Controllini:	SR000	(Set Relay 00 to Low)
+							Controllini to Sender:	SR000	(Set Relay 00 to Low)
+SDNNDM(MMM)	Set Digital (Number) High/Low
+			NN : '00' to '19'		(CONTROLLINO_D0 to CONTROLLINO_D19)
+				'99' Special Character
+				 Applys D to all Digitals masked by bitmask M(MMM)
+			D  : '0'* (Low)	'1' (High)
+			Note: 	* Every Character except '1' equals to Low
+					Setting a digital output always implies a  'SCNNO' (setting as output)
+			Reply Message: 	SDNND	(echo request) on success
+							NAK: Command Invalid 	on			protocol error
+			Example: 		Sender to Controllini:	SD021	(Set Digital 02 to High)
+							Controllini to Sender:	SR021	(Set Digital 02 to High)
+			Example:		Sender to Controllini:	SD000	(Set Digital 00 to Low)
+							Controllini to Sender:	SD000	(Set Digital 00 to Low)
+SCNNDM(MMM)	Set Config (Number) IOMODE
+			NN : '00' to '19'		(CONTROLLINO_D0 to CONTROLLINO_D19)
+				'99' Special Character
+				 Applys D to all IO Configs masked by bitmask M(MMM)
+			D  : 'O' (Output)	'P' (Input_Pullup) 	'I' (Input)
+			Note: * Every Character except 'O' or 'P' equals to Input
+			Reply Message: 	SCNND	(echo request) on success
+							NAK: Command Invalid 	on			protocol error
+			Example: 		Sender to Controllini:	SC02O	(Config Digital 02 as Output)
+							Controllini to Sender:	SC02O	(Config Digital 02 as Output)
+			Example: 		Sender to Controllini:	SC01P	(Config Digital 01 as Input with Pullup)
+							Controllini to Sender:	SC01P	(Config Digital 01 as Input with Pullup)
+			Example: 		Sender to Controllini:	SC19I	(Config Digital 19 as Input)
+							Controllini to Sender:	SC19I	(Config Digital 19 as Input)
+SVNNDQ(QQQ)	Set Volatile Memory Register (Number) Value
+			NN : '00' to '50'		(Array volmem[SIZEOFVOLMEM])
+			D  : Dont Care (any ASCII Character)
+			Q(QQQ): 16bit Integer value as ASCII String
+			Note: No range check of Q (no under/overflowdetection of int16_t)
+			Reply Message: 	SVNND	(echo request) on success
+							NAK: Command Invalid 	on			protocol error
+			Example: 		Sender to Controllini:	SV0002O		(volmem[0] = 20)
+							Controllini to Sender:	SV00020		(volmem[0] = 20)
+			Example: 		Sender to Controllini:	SV030-24O	(volmem[3] = -240)
+							Controllini to Sender:	SV030-240	(volmem[3] = -240)
+RANND		Read Analog Input (Number)
+			NN : '00' to '15'		(CONTROLLINO_A0 to CONTROLLINO_A15)
+				'99' Special Character
+				 Reads all analog inputs in sequence
+			D  : don't care (any ASCII character)
+			Reply Message: 	RANMD to RABNDDDD	on success
+								D(DDD) : Analog Value as ASCII String corresponting to 16 bit unsigned int
+								Only in case of NN = '99'
+								RANDD(DD).D(DD)....D(DD) (16 Strings separated by dot)
+							NAK: Command Invalid 	on			protocol error
+			Example: 		Sender to Controllini:	RA00x	(Read Analog Input 00)
+							Controllini to Sender:	RA00824	(Read Analog Input 00, Data: 824)
+RINND		Read Digital Inputs	(CONTROLLINO_I16, CONTROLLINO_I17, CONTROLLINO_I18, CONTROLLINO_IN0, CONTROLLINO_IN1)
+			NN : don't care (any two ASCII characters)
+			D  : don't care (any ASCII character)
+			Reply Message: 	RID to RIDDD	on success
+								D(DD) : Bitpattern as ASCII String corresponding to 8 bit unsigned int
+									Bit Meaning: 1 = Input High ; 0 = Input Low
+									LSB : 	CONTROLLINO_IN1
+											CONTROLLINO_IN0
+											CONTROLLINO_I18
+											CONTROLLINO_I18
+											CONTROLLINO_I17
+											CONTROLLINO_I16
+											0
+									MSB		0
+							NAK: Command Invalid 	on			protocol error
+			Example: 		Sender to Controllini:	RI000	(Read Inputs)
+							Controllini to Sender:	RI255	(Read Input, Data: All Inputs High)	
+			Example: 		Sender to Controllini:	RI000	(Read Inputs)
+							Controllini to Sender:	RI2  	(Read Input, Data: CONTROLLINO_IN0 High, rest low)	
+RDNND		Read Digitals	(CONTROLLINO_D0 to CONTROLLINO_D19)
+			NN : don't care (any two ASCII characters)
+			D  : don't care (any ASCII character)
+			Reply Message: 	RDD.D to RDDDDDD.DDDDD	on success
+								D(DDDD).D(DDDD) : 	Bitpattern Value as ASCII String corresponding to 32 bit unsigned int (two 16 bit unsigned int)
+												Highword.Lowword
+									Bit Meaning: 1 = Input High ; 0 = Input Low
+									MSB1,...,LSB1,MSB0,...,LSB0 
+									LSB0 : 	CONTROLLINO_D0
+											...
+									MSB0	CONTROLLINO_D15
+									LSB1	CONTROLLINO_D16
+											CONTROLLINO_D17
+											CONTROLLINO_D18
+											CONTROLLINO_D19
+											0
+											...
+									MSB1   	0
+							NAK: Command Invalid 	on			protocol error
+			Example: 		Sender to Controllini:	RD000	(Read Digitals)
+							Controllini to Sender:	RD15.65535	(Read Input, Data: All Inputs High)	
+			Example: 		Sender to Controllini:	RD000	(Read Inputs)
+							Controllini to Sender:	RD0.0  	(Read Input, Data: All Inputs Low)		
+RRNND		Read Relays	(CONTROLLINO_R0 to CONTROLLINO_R15)
+			NN : don't care (any two ASCII characters)
+			D  : don't care (any ASCII character)
+			Reply Message: 	RRD to RIDDDDD	on success
+								D(DDDD) : Bitpattern as ASCII String corresponding to 16 bit unsigned int
+									Bit Meaning: 1 = Input High ; 0 = Input Low
+									LSB : 	CONTROLLINO_R0
+											...
+									MSB		CONTROLLINO_R15
+							NAK: Command Invalid 	on			protocol error
+			Example: 		Sender to Controllini:	RR000	(Read Relays)
+							Controllini to Sender:	RR65535	(Read Relays, Data: All Relays High)	
+			Example: 		Sender to Controllini:	RR000	(Read Relays)
+							Controllini to Sender:	RR16384	(Read Input, Data: CONTROLLINO_R14 High, rest low)										
+RCNND		Read Digitals IO Configuration	(CONTROLLINO_D0 to CONTROLLINO_D19)
+			NN : don't care (any two ASCII characters)
+			D  : don't care (any ASCII character)
+			Reply Message: 	RCMMMMMMMMMMMMMMMMMMMM on success
+								MM..MM : 	19 ASCII Characters corresponding to IO Config of CONTROLLINO_A0
+									'O' , 'P' , 'I'
+							NAK: Command Invalid 	on			protocol error
+			Example: 		Sender to Controllini:	RC000	(Read IO Configuration)
+							Controllini to Sender:	RCOOOOOOOOOOOOOOOOOOOO	(Read Input, Data: All Inputs configured as Output)				
+RVNND		Read Volatile Memory Register (Number)
+			NN : '00' to '50'		(Array volmem[SIZEOFVOLMEM])
+			D  : Dont Care (any ASCII Character)
+			Reply Message: 	RCD to RVDDDD on success
+								D(DDD) : 16 bit Memory register value
+							NAK: Command Invalid 	on			protocol error
+			Example: 								
