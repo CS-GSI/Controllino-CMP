@@ -367,48 +367,7 @@ void loop() {
   //delay(10);
 
   // User Program here
-  
-  // Modbus UDP Test
-  // volmem[1] = vertical analog value
-  // volmem[2] = horizontal analog value
-  
-  if(volmem[0]){
-    volmem[0] = 0;
-    // analog magic
-    char magicanalog[] = {  0x00, 0x00, 0x00, 0x00,           // Transaction ID (0x0000), Protocol ID (0x0000) 
-                            0x00, 0x0B,                       // Number of remaining bytes (2 byte)
-                            0x01,                             // Unit ID (1 byte)
-                            0x10,                             // Function ID (1 byte)
-                            0x1F, 0x44,                       // Reference Number (2 byte)
-                            0x00, 0x02,                       // Word Count (2 byte)
-                            0x04,                             // Byte Count (1 byte)  
-                            0x00, 0x00, 0x00, 0x00   };       // Data (4 byte)
-    magicanalog[13] = (char)(volmem[1] >> 8);
-    magicanalog[14] = (char)(volmem[1]);
-    magicanalog[15] = (char)(volmem[2] >> 8);
-    magicanalog[16] = (char)(volmem[2]);
-    
-    digitalWrite(relays[0], HIGH);
-    Udp.beginPacket(modbusip, 502);
-    Udp.write(magicanalog,sizeof(magicanalog));
-    Udp.endPacket();
 
-    // digital magic
-    char magicdigital[] = { 0x00, 0x00, 0x00, 0x00,           // Transaction ID (0x0000), Protocol ID (0x0000) 
-                            0x00, 0x09,                       // Number of remaining bytes (2 byte)
-                            0x01,                             // Unit ID (1 byte)
-                            0x10,                             // Function ID (1 byte)
-                            0x1F, 0x43,                       // Reference Number (2 byte)
-                            0x00, 0x01,                       // Word Count (2 byte)
-                            0x02,                             // Byte Count (1 byte)  
-                            0x00, 0x00   };                   // Data (4 byte)
-    magicdigital[13] = (char)(volmem[3] >> 8);
-    magicdigital[14] = (char)(volmem[3]);
-    
-    Udp.beginPacket(modbusip, 502);
-    Udp.write(magicdigital,sizeof(magicdigital));
-    Udp.endPacket();
-  }
 }
 
 
