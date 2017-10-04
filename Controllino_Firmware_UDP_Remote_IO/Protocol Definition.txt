@@ -5,6 +5,14 @@ To read/write/config Controllini IOs a simple lightweight ASCII based protocol i
 All Characters must be ASCII as data is processed as string.
 Controllino answers corresponding to the request with a reply message.
 
+Tested and implemented for Controllinio Mega.
+Differences to other Contrllino Devices have not been taken into account. 
+
+CMP - ControllinoMessageProtocol V01
+
+# todo: add version number of protocol to message frame
+
+
 Sender to Controllino:
 Sends 4 byte Header and additional N byte Data 
 Header: SRC | P | N | N |

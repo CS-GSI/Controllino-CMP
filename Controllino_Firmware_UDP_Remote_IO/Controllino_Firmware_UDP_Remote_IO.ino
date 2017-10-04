@@ -1,8 +1,9 @@
 #include <Controllino.h>
-#include <SPI.h>         // needed for Arduino versions later than 0018
+#include <SPI.h>                 // needed for Arduino versions later than 0018
 #include <Ethernet.h>
 #include <EthernetUdp.h>         // UDP library from: bjoern@cs.stanford.edu 12/30/2008
 #include <stdio.h>
+#include "cmp.h"
 
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
@@ -10,11 +11,10 @@ byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 };
 IPAddress ip(192, 168, 0, 12);
-IPAddress modbusip(192, 168, 0, 11);
 unsigned int localPort = 8888;      // local port to listen on
 
 //Debug decreases Speed extremly, do not forget to disable it!
-//#define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
  #define DEBUG_PRINT(x)  Serial.print (x)
@@ -55,8 +55,7 @@ uint8_t getPinMode(uint8_t pin)
     return 'I';
 }
 
-#define SIZEOFVOLMEM 50
-volatile int16_t volmem[SIZEOFVOLMEM];
+volatile int16_t volmem[CMP_SIZEOFVOLMEM];
 
 const char relays[] = {   CONTROLLINO_R0,
                           CONTROLLINO_R1, 
@@ -122,11 +121,10 @@ const char digitals[] = { CONTROLLINO_D0,
 
 // buffers for receiving and sending data
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE];  //buffer to hold incoming packet,
-char ReplyBuffer[255] = "";       // a string to send back
+char ReplyBuffer[255] = "";                 // a string to send back
 
 // An EthernetUDP instance to let us send and receive packets over UDP
 EthernetUDP Udp;
-EthernetUDP UdpModbus;
 
 void setup() {
   // start the Ethernet and UDP:
@@ -134,7 +132,11 @@ void setup() {
   Udp.begin(localPort);
 
   Serial.begin(9600);
-
+  Serial.print("Controllinio listens for UDP Datagramms on ");
+  Serial.print(ip);
+  Serial.print(":");
+  Serial.println(localPort );
+  
   DEBUG_PRINTLN(sizeof(inputs));
   // inputs as inputs
   for (int i = 0; i < sizeof(inputs); ++i){
@@ -233,7 +235,7 @@ void loop() {
           }
           ReplyBuffer[4] = (PMODE == OUTPUT) ? 'O' : ((PMODE == INPUT_PULLUP) ? 'P' : 'I');
         }
-        else if(P == 'V' && (N < SIZEOFVOLMEM)){
+        else if(P == 'V' && (N < CMP_SIZEOFVOLMEM)){
           DEBUG_PRINTLN("P == V");
           //int d = atoi(packetBuffer+4);
           // magic d ...
@@ -334,7 +336,7 @@ void loop() {
         }
         else if(P == 'V'){
           DEBUG_PRINTLN("P == V");
-          DEBUG_PRINTLN(SIZEOFVOLMEM);
+          DEBUG_PRINTLN(CMP_SIZEOFVOLMEM);
           char str[15];
           ReplyBuffer[4] = 0;
           sprintf(str, "%u", volmem[N]);
