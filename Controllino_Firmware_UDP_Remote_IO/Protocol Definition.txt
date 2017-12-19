@@ -5,7 +5,7 @@ It allows you to read/write controllino IOs (Digital, Analog, Relays) and volati
 CMP is a simple lightweight ASCII based protocol, all characters must be ASCII.
 
 
-Implemented and partly tested for controllinoo Mega.
+Implemented and partly tested for Controllino Mega.
 Differences to other Contrllino Devices have not been taken into account. 
 
 ##################################################################
@@ -18,7 +18,7 @@ You have to replace 'V' with 'A' in any exampla below to make it work!
 
 Determining CMP version of your Controllino
 	You may either send an invalid command and hope for Error VEE01 or simply send Set/Read Error.
-	Sending invalid commands is possibly unsafe since you may not know if how a unknown CMP version may react to it. 
+	Sending invalid commands is possibly unsafe since you may not know how an unknown CMP version may react to it. 
 
 CMP Short Description
 	Command		|	Data D			|	Description						| 	Response
@@ -65,15 +65,15 @@ CMP Message Frame: [ Version | Header | Data ]
 					Additional Data such as Bitmasks
 
 Request - Response Pattern:
-	Controllino sends a Response to any datagram received. 
-	On Error Controllino sends an Error Response.
-	On SET-Requests controllino answers with a echo response of the request.
+	Controllino sends a response to any datagram received. 
+	On error Controllino sends an error response.
+	On SET-Requests controllino answers with a echo of the request.
 		Minor differences: If Data has been set to default value the response contains the set value
 	On READ-Requests Controllino answers with the command and data combined
 	Responses also loop back any additional charcters that have been added to the Request
 		This is simply due to how responses are generated (initially by making a copy of the request)
 
-Note on strings
+Note on strings:
 	The current implementation can handle zero and non-zero terminated strings. 
 
 Error are indicated by number. Known Errors:
