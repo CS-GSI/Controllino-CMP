@@ -5,23 +5,19 @@ There is a LabVIEW client available [LV-Controllino-CMP (https://github.com/CS-G
 
 # CMP - ControllinoMessageProtocol
 
-This protocol is designed to communicate with controllino devices in a command based request-response pattern.
-It allows you to read/write controllino IOs (Digital, Analog, Relays) and volatile memories. 
-CMP is a simple lightweight ASCII based protocol, all characters must be ASCII.
+This protocol is designed to communicate with controllino devices in a command based request-response pattern. It allows you to read/write controllino IOs (Digital, Analog, Relays) and volatile memories. CMP is a simple lightweight ASCII based protocol, all characters must be ASCII.
 
+Implemented and partly tested for Controllino Mega. Differences to other Contrllino Devices have not been taken into account. 
 
-Implemented and partly tested for Controllino Mega.
-Differences to other Contrllino Devices have not been taken into account. 
+___
+```
+CMP - ControllinoMessageProtocol (V01) 	Version 'A'
 
-##################################################################
-
-CMP - ControllinoMessageProtocol (V01)
-	Version 'A'
-		'A': V01 - 'A' like First, 'A' like ASCII, 'A' like A-Z should be enough characters for future development
-
-You have to replace 'V' with 'A' in any exampla below to make it work!
+	'A': V01 - 'A' like First, 'A' like ASCII, 'A' like A-Z should be enough characters for future development
+	You have to replace 'V' with 'A' in any exampla below to make it work!
 
 Determining CMP version of your Controllino
+
 	You may either send an invalid command and hope for Error VEE01 or simply send Set/Read Error.
 	Sending invalid commands is possibly unsafe since you may not know how an unknown CMP version may react to it. 
 
@@ -292,3 +288,4 @@ VRVNN			Read Volatile Memory Register (Number)
 								controllino to Sender:	VRV01+10	(Read memory element 01, Data: 10)
 			Example: 			Sender to controllino:	VRV05		(Read memory element 05)					
 								controllino to Sender:	VRV06-32767	(Read memory element 01, Data: -32767)
+```
