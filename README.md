@@ -3,6 +3,64 @@ This is a Arduino library (cpp and header file) written to provide a message int
 
 There is a LabVIEW client available [LV-Controllino-CMP (https://github.com/CS-GSI/LV-Controllino-CMP.git)](https://github.com/CS-GSI/LV-Controllino-CMP.git).
 
+# HowTo use in your Arduino sketch
+## Option 1: Add this repositiory as submodule. Name the submodule folder "src". 
+Include header as shown below.
+```
+#include <Controllino.h>
+#include <EthernetUdp.h>         // UDP library from: bjoern@cs.stanford.edu 12/30/2008
+#include "src/Controllino-CMP/cmp.h"
+
+// Enter a MAC address and IP address for your controller below
+byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+// IP address of your controllino
+IPAddress ip(192, 168, 0, 12);
+// Local port to listen on UDP datagram messages
+unsigned int localPort = 8888;
+
+void setup() {
+  #ifdef CMP_DEBUG
+    Serial.begin(9600);
+  #endif
+  cmp_setup(ip, mac, localPort);
+}
+
+void loop() {
+  cmp_core();
+  //delay(10);
+
+  // User Program here
+}
+```
+## Option 2: Copy and place 'cmp.h' and 'cmp.cpp' in your sketch folder. 
+Include header as shown below.
+```
+#include <Controllino.h>
+#include <EthernetUdp.h>         // UDP library from: bjoern@cs.stanford.edu 12/30/2008
+#include "cmp.h"
+
+// Enter a MAC address and IP address for your controller below
+byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+// IP address of your controllino
+IPAddress ip(192, 168, 0, 12);
+// Local port to listen on UDP datagram messages
+unsigned int localPort = 8888;
+
+void setup() {
+  #ifdef CMP_DEBUG
+    Serial.begin(9600);
+  #endif
+  cmp_setup(ip, mac, localPort);
+}
+
+void loop() {
+  cmp_core();
+  //delay(10);
+
+  // User Program here
+}
+```
+
 # CMP - ControllinoMessageProtocol
 
 This protocol is designed to communicate with controllino devices in a command based request-response pattern. It allows you to read/write controllino IOs (Digital, Analog, Relays) and volatile memories. CMP is a simple lightweight ASCII based protocol, all characters must be ASCII.
