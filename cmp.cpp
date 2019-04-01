@@ -16,82 +16,11 @@
 #include <stdio.h>
 #include "cmp.h"
 
-// All relay outputs
-const char relays[] = {   CONTROLLINO_R0,
-                          CONTROLLINO_R1, 
-                          CONTROLLINO_R2,
-                          CONTROLLINO_R3,
-                          CONTROLLINO_R4,
-                          CONTROLLINO_R5,
-                          CONTROLLINO_R6,
-                          CONTROLLINO_R7,
-                          CONTROLLINO_R8,
-                          CONTROLLINO_R9,
-                          CONTROLLINO_R10,
-                          CONTROLLINO_R11,
-                          CONTROLLINO_R12,
-                          CONTROLLINO_R13,
-                          CONTROLLINO_R14,
-                          CONTROLLINO_R15     };
-
-// All digital inputs (input only)
-const char inputs[] = {   CONTROLLINO_I16, 
-                          CONTROLLINO_I17, 
-                          CONTROLLINO_I18, 
-                          CONTROLLINO_IN0, 
-                          CONTROLLINO_IN1     };
-// All analog inputs
-const char analogs[] = {  CONTROLLINO_A0,
-                          CONTROLLINO_A1, 
-                          CONTROLLINO_A2,
-                          CONTROLLINO_A3,
-                          CONTROLLINO_A4,
-                          CONTROLLINO_A5,
-                          CONTROLLINO_A6,
-                          CONTROLLINO_A7,
-                          CONTROLLINO_A8,
-                          CONTROLLINO_A9,
-                          CONTROLLINO_A10,
-                          CONTROLLINO_A11,
-                          CONTROLLINO_A12,
-                          CONTROLLINO_A13,
-                          CONTROLLINO_A14,
-                          CONTROLLINO_A15     };
-                          
-// All digital input/outputs which are not input only
-const char digitals[] = { CONTROLLINO_D0,
-                          CONTROLLINO_D1, 
-                          CONTROLLINO_D2,
-                          CONTROLLINO_D3,
-                          CONTROLLINO_D4,
-                          CONTROLLINO_D5,
-                          CONTROLLINO_D6,
-                          CONTROLLINO_D7,
-                          CONTROLLINO_D8,
-                          CONTROLLINO_D9,
-                          CONTROLLINO_D10,
-                          CONTROLLINO_D11,
-                          CONTROLLINO_D12,
-                          CONTROLLINO_D13,
-                          CONTROLLINO_D14,
-                          CONTROLLINO_D15,
-                          CONTROLLINO_D16,
-                          CONTROLLINO_D17,
-                          CONTROLLINO_D18,
-                          CONTROLLINO_D19     };
-
 // Volatile memory to store random data
 volatile int16_t volmem[CMP_SIZEOFVOLMEM];
 
-// An EthernetUDP instance to let us send and receive packets over UDP
-EthernetUDP Udp;
-// buffers for receiving data
-char packetBuffer[UDP_TX_PACKET_MAX_SIZE+1];       
-// buffer for sending data
-char ReplyBuffer[UDP_TX_PACKET_MAX_SIZE+1] = "";   
-
-// setup 
-void cmp_setup(IPAddress ip, byte * mac, unsigned int localPort){
+void cmp::setup(IPAddress ip, byte * mac, unsigned int localPort){
+  //cmp_setup(ip, mac, localPort);
   Ethernet.begin(mac, ip);
   Udp.begin(localPort);
 
@@ -113,8 +42,43 @@ void cmp_setup(IPAddress ip, byte * mac, unsigned int localPort){
   }
 }
 
-void cmp_core(){
-  int packetSize = Udp.parsePacket();
+static uint8_t cmp::cmp_getPinMode(uint8_t pin)
+{
+  uint8_t bit = digitalPinToBitMask(pin);
+  uint8_t port = digitalPinToPort(pin);
+
+  // I don't see an option for mega to return this, but whatever...
+  if (NOT_A_PIN == port) return UNKNOWN_PIN;
+
+  // Is there a bit we can check?
+  if (0 == bit) return UNKNOWN_PIN;
+
+  // Is there only a single bit set?
+  if (bit & bit - 1) return UNKNOWN_PIN;
+
+  volatile uint8_t *reg, *out;
+  reg = portModeRegister(port);
+  out = portOutputRegister(port);
+
+  if (*reg & bit)
+    //return OUTPUT;
+    return 'O';
+  else if (*out & bit)
+    //return INPUT_PULLUP;
+    return 'P';
+  else
+    //return INPUT;
+    return 'I';
+}
+
+void cmp::core(){
+  //cmp_core();  
+  // buffers for receiving data
+  char packetBuffer[UDP_TX_PACKET_MAX_SIZE+1];       
+  // buffer for sending data
+  char ReplyBuffer[UDP_TX_PACKET_MAX_SIZE+1] = "";   
+
+    int packetSize = Udp.parsePacket();
   // if there's data available, read a packet
   if (packetSize) {
     #ifdef DEBUG
@@ -437,33 +401,4 @@ void cmp_core(){
     Udp.write(ReplyBuffer);
     Udp.endPacket();
   }
-}
-
-uint8_t cmp_getPinMode(uint8_t pin)
-{
-  uint8_t bit = digitalPinToBitMask(pin);
-  uint8_t port = digitalPinToPort(pin);
-
-  // I don't see an option for mega to return this, but whatever...
-  if (NOT_A_PIN == port) return UNKNOWN_PIN;
-
-  // Is there a bit we can check?
-  if (0 == bit) return UNKNOWN_PIN;
-
-  // Is there only a single bit set?
-  if (bit & bit - 1) return UNKNOWN_PIN;
-
-  volatile uint8_t *reg, *out;
-  reg = portModeRegister(port);
-  out = portOutputRegister(port);
-
-  if (*reg & bit)
-    //return OUTPUT;
-    return 'O';
-  else if (*out & bit)
-    //return INPUT_PULLUP;
-    return 'P';
-  else
-    //return INPUT;
-    return 'I';
 }
