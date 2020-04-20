@@ -72,7 +72,7 @@ ___
 CMP - ControllinoMessageProtocol (V01) 	Version 'A'
 
 	'A': V01 - 'A' like First, 'A' like ASCII, 'A' like A-Z should be enough characters for future development
-	You have to replace 'V' with 'A' in any exampla below to make it work!
+	You have to replace 'V' with 'A' in any example below to make it work!
 
 Determining CMP version of your Controllino
 
@@ -92,8 +92,9 @@ CMP Short Description
 	VRDNN		|	-				|	Read Digitals					|	
 	VRENN		|	-				|	Read Error						|	
 	VRINN		|	-				|	Read Digital Inputs				|	
-	VRRNN		|	-				|	Read Relays						|	Error or ARRNND(DDDD)
-	VRVNN		|	-				|	Read Volatile Memory Register 	|	
+	VRRNN		|	-				|	Read Relays						|	Error or VRRNND(DDDD)
+	VRVNN		|	-				|	Read Volatile Memory Register 	|							
+	VRSNN		|	-				| 	Read System Info				| 	Error or VRSNND(DD...DD)
 
 * Data is Mask!
 
@@ -145,6 +146,8 @@ Error are indicated by number. Known Errors:
 	06:		Analog number out of scope
 	07:		Digital input number out of scope
 	08:		Request unknown
+	09:		System Info unknown
+	10:		Analog Output number out of scope (Maxi Automation only)
 
 Error Examples
 	'x' equals to any invalid character
@@ -163,6 +166,7 @@ Error Examples
 	VRV98(y...)			|		VEE04
 	VRA98(y...)			|		VEE06
 	VRI98(y...)			|		VEE07
+	VRS00				|		VEE09
 
 Valid Protocols:
 VSCNNDM(MMM)	Set Config (Number) IOMODE
@@ -200,6 +204,15 @@ VSDNNDM(MMM)	Set Digital (Number) High/Low
 			Example:		Sender to controllino:	ASD99H3	(Set Digital 00 and 01 to High)
 							controllino to Sender:	ASD99H3	(Set Digital 00 and 01 to High)
 			Also compare to examples above
+
+VSANND(DD)	Set Analog (Number)  - Maxi Automation Only!
+			NN : 	'00' to '1'		(CONTROLLINO_AO0 to CONTROLLINO_AO1)
+					'99' Special Character
+					Applys D to all analog outputs
+			 D 	: 	0-255 whew 0 = 0V/0mA and 255 = 10V/20mA
+					See Controlino documentation for information on current output https://www.controllino.biz/tutorials/#1539865917778-d865e233-cd45
+					On my Controllino Maxi Automation the 0 ohm resistors were missing.
+					
 
 VSENND			Set Error
 			Set Error has no purpose
@@ -346,4 +359,11 @@ VRVNN			Read Volatile Memory Register (Number)
 								controllino to Sender:	VRV01+10	(Read memory element 01, Data: 10)
 			Example: 			Sender to controllino:	VRV05		(Read memory element 05)					
 								controllino to Sender:	VRV06-32767	(Read memory element 01, Data: -32767)
+								
+VRSNN			Read System Info
+			NN : '01'		Return System info: "MEGA" or "MAXI_AUTO"
+			Response Message: 	VRVNNMEGA or VRVNNMAXIS_AUTO on success
+								VEENN	on protocol error
+			Example: 			Sender to controllino:	VRS01					
+								controllino to Sender:	VRS01MEGA
 ```

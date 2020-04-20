@@ -117,6 +117,7 @@ void cmp::core(){
     char  STATE  = (D == 'H') ? HIGH : LOW;
     int   MASK    = atoi(&(packetBuffer[CMP_OFFSET_DATA+1]));
     int   MEMMASK    = atoi(&(packetBuffer[CMP_OFFSET_DATA]));
+	int   AOUT = MEMMASK;
 
     //  --------------- Invalid CMP Version -----------------
     if(V != CMP_VERSION){
@@ -129,9 +130,35 @@ void cmp::core(){
       //  --------------- VS  SET ---------------------------
       if(R == 'S'){
         DEBUG_PRINTLN("R == S");
-
+		
+		//  --------------- VSC  SET Analog output ------------------
+		#ifdef CONTROLLINO_MAXI_AUTOMATION
+		if(P == 'A'){
+			DEBUG_PRINTLN("P == A");
+			
+			if(N == 99){
+            for(int i = 0; i < sizeof(analog_outs); ++i){
+              pinMode(analog_outs[i], OUTPUT);
+			        analogWrite(analog_outs[i], AOUT);
+            }
+          }
+          else if (N >= 0 && N < sizeof(analog_outs)){
+            pinMode(analog_outs[N], OUTPUT);
+			      analogWrite(analog_outs[N], AOUT);
+			      DEBUG_PRINTLN(AOUT);
+          }
+          else{
+            strcpy(ReplyBuffer, CMP_ERR_SCOPEREANAOUT);
+          }
+		}
+		#endif
         //  --------------- VSC  SET Config ------------------
-        if(P == 'C'){
+		#ifdef CONTROLLINO_MEGA
+		if(P == 'C'){
+		#endif
+		#ifdef CONTROLLINO_MAXI_AUTOMATION
+		else if(P == 'C'){
+		#endif
           DEBUG_PRINTLN("P == C");
 
           ReplyBuffer[CMP_OFFSET_DATA] = (PMODE == OUTPUT) ? 'O' : ((PMODE == INPUT_PULLUP) ? 'P' : 'I');
@@ -383,6 +410,21 @@ void cmp::core(){
           }
           else {
             strcpy(ReplyBuffer, CMP_ERR_SCOPEREVOLMEM);
+          }
+        }
+		//  --------------- VRS  READ System Info --------
+        else if(P == 'S'){
+          DEBUG_PRINTLN("P == S");
+          
+          DEBUG_PRINTLN(CMP_SIZEOFVOLMEM);
+          
+          if(N == 1){   // Return controllino type
+            char str[15];
+            ReplyBuffer[CMP_OFFSET_DATA] = 0;
+            strcat(ReplyBuffer,CMP_ERR_SYSTYPE);
+          }
+          else {
+            strcpy(ReplyBuffer, CMP_ERR_SYSINFUNKNONW);
           }
         }
         else {

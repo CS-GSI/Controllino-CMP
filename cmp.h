@@ -28,6 +28,8 @@
 #define CMP_ERR_SCOPEANALOG         "VEE06"
 #define CMP_ERR_SCOPEAINPUTS        "VEE07"
 #define CMP_ERR_REQUNKNONW          "VEE08"
+#define CMP_ERR_SYSINFUNKNONW       "VEE09"
+#define CMP_ERR_SCOPEREANAOUT       "VEE10"
 
 //Debug decreases speed extremly, do not forget to disable it!
 //#define CMP_DEBUG
@@ -45,8 +47,17 @@
 
 extern volatile int16_t volmem[];
 
+#ifdef CONTROLLINO_MEGA
+#define CMP_ERR_SYSTYPE "MEGA"
+#endif
+
+#ifdef CONTROLLINO_MAXI_AUTOMATION
+#define CMP_ERR_SYSTYPE "MAXI_AUTO"
+#endif
+
 // All relay outputs
-const char relays[] = {    CONTROLLINO_R0,
+#ifdef CONTROLLINO_MEGA
+const char relays[] = {    		CONTROLLINO_R0,
                                 CONTROLLINO_R1, 
                                 CONTROLLINO_R2,
                                 CONTROLLINO_R3,
@@ -61,16 +72,39 @@ const char relays[] = {    CONTROLLINO_R0,
                                 CONTROLLINO_R12,
                                 CONTROLLINO_R13,
                                 CONTROLLINO_R14,
-                                CONTROLLINO_R15     }; 
+                                CONTROLLINO_R15    }; 
+#endif
+
+#ifdef CONTROLLINO_MAXI_AUTOMATION
+const char relays[] = {    		CONTROLLINO_R0,
+                                CONTROLLINO_R1, 
+                                CONTROLLINO_R2,
+                                CONTROLLINO_R3,
+                                CONTROLLINO_R4,
+                                CONTROLLINO_R5,
+                                CONTROLLINO_R6,
+                                CONTROLLINO_R7,
+                                CONTROLLINO_R8,
+                                CONTROLLINO_R9		}; 
+#endif
 
 // All digital inputs (input only)
-const char inputs[] = {    CONTROLLINO_I16, 
+#ifdef CONTROLLINO_MEGA
+const char inputs[] = {    		CONTROLLINO_I16, 
                                 CONTROLLINO_I17, 
                                 CONTROLLINO_I18, 
                                 CONTROLLINO_IN0, 
                                 CONTROLLINO_IN1     };
+#endif
+
+#ifdef CONTROLLINO_MAXI_AUTOMATION
+const char inputs[] = {    		CONTROLLINO_IN0, 
+                                CONTROLLINO_IN1		};
+#endif
+
 // All analog inputs
-const char analogs[] = {   CONTROLLINO_A0,
+#ifdef CONTROLLINO_MEGA
+const char analogs[] = {   		CONTROLLINO_A0,
                                 CONTROLLINO_A1, 
                                 CONTROLLINO_A2,
                                 CONTROLLINO_A3,
@@ -85,10 +119,27 @@ const char analogs[] = {   CONTROLLINO_A0,
                                 CONTROLLINO_A12,
                                 CONTROLLINO_A13,
                                 CONTROLLINO_A14,
-                                CONTROLLINO_A15     };
+                                CONTROLLINO_A15		};
+#endif
+
+#ifdef CONTROLLINO_MAXI_AUTOMATION
+const char analogs[] = {   		CONTROLLINO_A0,
+                                CONTROLLINO_A1, 
+                                CONTROLLINO_A2,
+                                CONTROLLINO_A3,
+                                CONTROLLINO_A4,
+                                CONTROLLINO_A5,
+                                CONTROLLINO_A6,
+                                CONTROLLINO_A7,
+                                CONTROLLINO_A8,
+                                CONTROLLINO_A9,
+                                CONTROLLINO_A10,
+                                CONTROLLINO_A11		};
+#endif
                           
 // All digital input/outputs which are not input only
-const char digitals[] = {  CONTROLLINO_D0,
+#ifdef CONTROLLINO_MEGA
+const char digitals[] = {  		CONTROLLINO_D0,
                                 CONTROLLINO_D1, 
                                 CONTROLLINO_D2,
                                 CONTROLLINO_D3,
@@ -107,8 +158,29 @@ const char digitals[] = {  CONTROLLINO_D0,
                                 CONTROLLINO_D16,
                                 CONTROLLINO_D17,
                                 CONTROLLINO_D18,
-                                CONTROLLINO_D19     };
+                                CONTROLLINO_D19,
+								CONTROLLINO_D20,
+								CONTROLLINO_D21,
+								CONTROLLINO_D22,
+								CONTROLLINO_D23		};
+#endif
 
+#ifdef CONTROLLINO_MAXI_AUTOMATION
+const char digitals[] = {  		CONTROLLINO_D0,
+                                CONTROLLINO_D1, 
+                                CONTROLLINO_D2,
+                                CONTROLLINO_D3,
+                                CONTROLLINO_D4,
+                                CONTROLLINO_D5,
+                                CONTROLLINO_D6,
+                                CONTROLLINO_D7		};
+#endif
+
+// All analog outputs. Maxi automation only
+#ifdef CONTROLLINO_MAXI_AUTOMATION
+const char analog_outs[] = {  	CONTROLLINO_AO0,
+                                CONTROLLINO_AO1		};
+#endif
 
 class cmp {
   private:
