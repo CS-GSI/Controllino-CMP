@@ -108,7 +108,7 @@ void cmp::core(){
 
     // Divide the datagram into its message parts
     char  V      = packetBuffer[CMP_OFFSET_VERSION];            // Version               'V': CMP Version
-    char  R      = packetBuffer[CMP_OFFSET_REQRES];             // Request/Response      'S': Set, 'R': Read
+    char  R      = packetBuffer[CMP_OFFSET_REQRES];             // Request/Response      'S': Set, 'R': Read, 'Q': Set Quite (no response)
     char  P      = packetBuffer[CMP_OFFSET_Property];           // Property              'A': Analog, 'C': Config, 'D': Digital, 'E': Error, 'I': Input, 'R': Relay, 'V': Volatile Memory
     char  N      = (packetBuffer[CMP_OFFSET_NUMBER]-48)*10      // NN: Number, ASCII 2 Byte to Char conversion.
                     + packetBuffer[CMP_OFFSET_NUMBER+1] - 48;   
@@ -128,8 +128,9 @@ void cmp::core(){
       strcpy(ReplyBuffer, packetBuffer);
 
       //  --------------- VS  SET ---------------------------
-      if(R == 'S'){
-        DEBUG_PRINTLN("R == S");
+      if(R == 'S' or R == 'Q'){
+		if(R == 'S') DEBUG_PRINTLN("R == S");
+		if(R == 'Q') DEBUG_PRINTLN("R == S");
 		
 		//  --------------- VSC  SET Analog output ------------------
 		#ifdef CONTROLLINO_MAXI_AUTOMATION
@@ -436,11 +437,13 @@ void cmp::core(){
       }
     }
     
-    ReplyBuffer[0] = CMP_VERSION;
-    DEBUG_PRINT("ReplyBuffer : ");
-    DEBUG_PRINTLN(ReplyBuffer);
-    Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
-    Udp.write(ReplyBuffer);
-    Udp.endPacket();
+	if(R != 'Q'){
+		ReplyBuffer[0] = CMP_VERSION;
+		DEBUG_PRINT("ReplyBuffer : ");
+		DEBUG_PRINTLN(ReplyBuffer);
+		Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
+		Udp.write(ReplyBuffer);
+		Udp.endPacket();
+	}
   }
 }

@@ -65,7 +65,7 @@ void loop() {
 
 This protocol is designed to communicate with controllino devices in a command based request-response pattern. It allows you to read/write controllino IOs (Digital, Analog, Relays) and volatile memories. CMP is a simple lightweight ASCII based protocol, all characters must be ASCII.
 
-Implemented and partly tested for Controllino Mega. Differences to other Contrllino Devices have not been taken into account. 
+Implemented and partly tested for Controllino Mega & Maxi Automation. Differences to other Contrllino Devices have not been taken into account. 
 
 ___
 ```
@@ -108,6 +108,7 @@ CMP Message Frame: [ Version | Header | Data ]
 	byte 1		R	(Request)
 					'R': Read
 					'S': Set
+					'Q': Set quite - no response
 					'E': On Error Response
 	byte 2		P	(Property)
 					'A': Analog
@@ -125,7 +126,7 @@ CMP Message Frame: [ Version | Header | Data ]
 					Additional Data such as Bitmasks
 
 Request - Response Pattern:
-	Controllino sends a response to any datagram received. 
+	Controllino sends a response to any datagram received. (Unless you use "'Q': Set quite")
 	On error Controllino sends an error response.
 	On SET-Requests controllino answers with a echo of the request.
 		Minor differences: If Data has been set to default value the response contains the set value
